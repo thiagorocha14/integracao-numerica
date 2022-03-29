@@ -9,19 +9,12 @@ $intervalo = $_POST["intervalo"];
 if (isset($_POST['btnCalcular'])) {
     bcscale($_POST["precisao"]);
     if ($metodo == "1S") {
-        $alturaFinal = (double) ($limiteDireito - $limiteEsquerdo) / $intervalo;
+        $alturaFinal = bcdiv(($limiteDireito - $limiteEsquerdo), $intervalo);
         $matrizFinal = tabelaY($limiteEsquerdo, $limiteDireito, $alturaFinal, $intervalo, $funcao);
         $y = valorY($matrizFinal);
         $string = tercoDeSimpson($y, $alturaFinal);
-    }
-}
-
-function quadraturaGaussiana($limEsquerdo, $limDireito, $numero, $integral)
-{
-    $retorno = "";
-    if ($limEsquerdo == "-1" && $limDireito == "1") {
-        $integral = str_replace("dx", "", $integral);
-
+    } else if ($metodo == "QG") {
+        $string = quadraturaGaussiana($limiteEsquerdo, $limiteDireito, $intervalo, $funcao);
     }
 }
 
@@ -82,6 +75,156 @@ function tercoDeSimpson($y, $altura)
     }
     $resultado = ($altura / 3) * $resultado;
     return $resultado;
+}
+
+function extrapolacaoRicharlison($identificador, $n1, $i1, $n2, $i2)
+{
+    $expoente = (int) 0;
+    if ($identificador == 1) {
+        $expoente = 2;
+    } else {
+        $expoente = 4;
+    }
+    $p1 = bcdiv(bcpow($n1, $expoente), (bcsub(bcpow($n2, $expoente), bcpow($n1, $expoente))));
+    $p2 = bcsub($i2, $i1);
+    $resultado = bcadd($i2, (bcmul($p1, $p2)));
+    return $resultado;
+}
+
+function quadraturaGaussiana($limEsquerdo, $limDireito, $numero, $integral)
+{
+    $retorno = "";
+    if ($limEsquerdo == "-1" && $limDireito == "1") {
+        $integral = str_replace("dx", "", $integral);
+        $A = tabelaA($numero);
+        $X = tabelaX($numero);
+
+        for ($i = 0; $i < $numero; $i++) {
+            if ($i == ($numero - 1)) {
+                $retorno .= "bcmul(" . $A[$i] . " , " . str_replace("x", $X[$i], $integral) . ")";
+            } else {
+                $retorno .= "bcmul(" . $A[$i] . " , " . str_replace("x", $X[$i], $integral) . ")" . "+";
+            }
+        }
+
+    } else {
+        $integral = str_replace("dx", "", $integral);
+        $A = tabelaA($numero);
+        $X = tabelaX($numero);
+
+        $dt = "(((" . $limDireito . ") - (" . $limEsquerdo . ")) / 2) * ";
+        $t = "(((" . $limDireito . " - " . $limEsquerdo . ") / 2 ) * l + ((" . $limDireito . " + " . $limEsquerdo . ") / 2 ))";
+
+        $integral = str_replace("x", $t, $integral);
+        $integral = $dt . $integral;
+        for ($i = 0; $i < $numero; $i++) {
+            if ($i == ($numero - 1)) {
+                $retorno .= $A[$i] . " * " . str_replace("l", "(" . $X[$i] . ")", $integral);
+            } else {
+                $retorno .= $A[$i] . " * " . str_replace("l", "(" . $X[$i] . ")", $integral) . "+";
+            }
+        }
+    }
+
+    return eval('return ' . $retorno . ';');
+}
+
+function tabelaA($n)
+{
+    $retorno = [];
+    if ($n == 2) {
+        array_push($retorno, 1);
+        array_push($retorno, 1);
+    } else if ($n == 3) {
+        array_push($retorno, 0.5555555556);
+        array_push($retorno, 0.8888888889);
+        array_push($retorno, 0.5555555556);
+    } else if ($n == 4) {
+        array_push($retorno, 0.3478548451);
+        array_push($retorno, 0.6521451549);
+        array_push($retorno, 0.6521451549);
+        array_push($retorno, 0.3478548451);
+    } else if ($n == 5) {
+        array_push($retorno, 0.2369268850);
+        array_push($retorno, 0.4786286705);
+        array_push($retorno, 0.5688888889);
+        array_push($retorno, 0.4786286705);
+        array_push($retorno, 0.2369268850);
+    } else if ($n == 6) {
+        array_push($retorno, 0.1713244924);
+        array_push($retorno, 0.3607615730);
+        array_push($retorno, 0.4679139346);
+        array_push($retorno, 0.4679139346);
+        array_push($retorno, 0.3607615730);
+        array_push($retorno, 0.1713244924);
+    } else if ($n == 7) {
+        array_push($retorno, 0.1294849662);
+        array_push($retorno, 0.2797053915);
+        array_push($retorno, 0.3818300505);
+        array_push($retorno, 0.4179591837);
+        array_push($retorno, 0.3818300505);
+        array_push($retorno, 0.2797053915);
+        array_push($retorno, 0.1294849662);
+    } else if ($n == 8) {
+        array_push($retorno, 0.1012285363);
+        array_push($retorno, 0.2223810345);
+        array_push($retorno, 0.3137066459);
+        array_push($retorno, 0.3626837838);
+        array_push($retorno, 0.3626837838);
+        array_push($retorno, 0.3137066459);
+        array_push($retorno, 0.2223810345);
+        array_push($retorno, 0.1012285363);
+    }
+    return $retorno;
+}
+
+function tabelaX($n)
+{
+    $retorno = [];
+    if ($n == 2) {
+        array_push($retorno, -0.5773502692);
+        array_push($retorno, 0.5773502692);
+    } else if ($n == 3) {
+        array_push($retorno, -0.7745966692);
+        array_push($retorno, 0);
+        array_push($retorno, 0.7745966692);
+    } else if ($n == 4) {
+        array_push($retorno, -0.8611363116);
+        array_push($retorno, -0.3399810436);
+        array_push($retorno, 0.3399810436);
+        array_push($retorno, 0.8611363116);
+    } else if ($n == 5) {
+        array_push($retorno, -0.9061798459);
+        array_push($retorno, -0.5384693101);
+        array_push($retorno, 0);
+        array_push($retorno, 0.5384693101);
+        array_push($retorno, 0.9061798459);
+    } else if ($n == 6) {
+        array_push($retorno, -0.9324695142);
+        array_push($retorno, -0.6612093865);
+        array_push($retorno, -0.2386191861);
+        array_push($retorno, 0.2386191861);
+        array_push($retorno, 0.6612093865);
+        array_push($retorno, 0.9324695142);
+    } else if ($n == 7) {
+        array_push($retorno, -0.9491079123);
+        array_push($retorno, -0.7415311855);
+        array_push($retorno, -0.4058451513);
+        array_push($retorno, 0);
+        array_push($retorno, 0.4058451513);
+        array_push($retorno, 0.7415311855);
+        array_push($retorno, 0.9491079123);
+    } else if ($n == 8) {
+        array_push($retorno, -0.9602898565);
+        array_push($retorno, -0.7966664774);
+        array_push($retorno, -0.5255324099);
+        array_push($retorno, -0.1834346425);
+        array_push($retorno, 0.1834346425);
+        array_push($retorno, 0.5255324099);
+        array_push($retorno, 0.7966664774);
+        array_push($retorno, 0.9602898565);
+    }
+    return $retorno;
 }
 
 //Função para "traduzir" para bc, mas não está funcionando
@@ -176,19 +319,24 @@ function bc()
             <br>
             <button class="btn btn-success float-right" name="btnCalcular">Calcular</button>
             <h1><?php echo "Resultado: " . $string ?></h1>
-            <? if(isset($matrizFinal)) { ?>
+            <?php if (isset($matrizFinal)): ?>
+            <br>
             <h6>Tabela de Y:</h6>
-            <? $counttoken = count($token);
-                $k=0;
-                foreach($token as $key=>$value)
-                    {
-                        echo "<tr><td>$value</td>";
-                        for($i=0; $i<$counttoken;$i++)
-                        {
-                            echo "<td>" .$num[$k++]. "</td>";
-                        }
-                }   ?>
-            <? } ?>
+            <table class="table">
+                <tr>
+                    <th>i</th>
+                    <th>X</th>
+                    <th>Y</th>
+                </tr>
+                <?php foreach ($matrizFinal as $matriz): ?>
+                <?php echo ('<tr>'); ?>
+                <?php foreach ($matriz as $array): ?>
+                <?php echo ('<td>' . $array . '</td>'); ?>
+                <?php endforeach;?>
+                <?php echo ('</tr>'); ?>
+                <?php endforeach;?>
+                <?php endif;?>
+            </table>
             <br>
             <br>
             <br>
