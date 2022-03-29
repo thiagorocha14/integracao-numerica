@@ -17,5 +17,16 @@
 
       return $resultado;
     }
+
+    function erroTresOitavosSimpson($derivada,$altura){
+        $resultado =0;
+        $final = $derivada.replace('x','1');
+        $ExpDerivada = eval('return'.$final.';');
+
+        $resultado = (-((3/8)* pow($altura,5)) * ($ExpDerivada));
+        
+        return $resultado;
+    }
+
     
 ?>
