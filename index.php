@@ -2,7 +2,11 @@
 $string = (float) null;
 $funcao = $_POST["funcao"];
 $metodo = $_POST["metodo"];
+
+//Limite esquerdo -> inferior
 $limiteEsquerdo = $_POST["limiteEsquerdo"];
+
+//Limite direito -> superior
 $limiteDireito = $_POST["limiteDireito"];
 $intervalo = $_POST["intervalo"];
 
@@ -14,6 +18,19 @@ if (isset($_POST['btnCalcular'])) {
         $y = valorY($matrizFinal);
         $string = tercoDeSimpson($y, $alturaFinal);
     }
+
+    if ($metodo == "RT") {
+        $h = calculaH($limDireito, $limEsquerdo, $intervalo);
+        $matrizFinal = tabelaY($limEsquerdo, $limDireito, $h, $intervalo, $funcao);
+        $y = valorY($matrizFinal);
+        $string = trapezio($y, $h);
+    }
+
+}
+
+function calculaH($limSuperior, $limInferior, $nIntervalos) {
+    $h = ($limSuperior - $limInferior) / $nIntervalos;
+    return $h;
 }
 
 function quadraturaGaussiana($limEsquerdo, $limDireito, $numero, $integral)
@@ -82,6 +99,32 @@ function tercoDeSimpson($y, $altura)
     }
     $resultado = ($altura / 3) * $resultado;
     return $resultado;
+}
+
+// Ainda não funcionando corretamente
+function trapezio(Array $y, float $h) {
+    $result = (double) 0;
+
+    foreach ($y as $key => $value) {
+        if ($key == 0 || $key == (count($y) - 1)) {
+            $result = bcadd($result, $value);
+        } else {
+            $result = bcadd($result, bcmul(2, $value));
+        }
+    }
+
+    $result = bcmul(bcdiv($h, 2), $result);
+    return $result;
+}
+
+// Ainda não funcionando corretamente
+function erroTrapezio(float $h, float $limSup, float $limInf, string $derivada) {
+    $result = (double) 0;
+    $retFinal = (string) $derivada.str_replace("x", "3");
+    $devF = (double) eval('return ' . $retFinal . ';');
+    $result = (-((($limSup - $limInf) * bcpow($h, "2")) / 12 )) * $devF;
+
+    return $result;
 }
 
 //Função para "traduzir" para bc, mas não está funcionando
@@ -193,12 +236,14 @@ function bc()
             <br>
             <br>
             <h6>Dicas:</h6>
-            <p>Para adicionar utilize bcadd(Base, Número para somar)</p>
-            <p>Para subtrair utilize bcsub(Base, Número para diminuir)</p>
-            <p>Para dividir utilize bcdiv(Dividendo, Divisor)</p>
-            <p>Para multiplicar utilize bcmul(Base , Multiplicador)</p>
-            <p>Para elevar utilize bcpow(Base, Expoente)</p>
-            <p>Para obter raiz quadrada utilize bcsqrt(Número)</p>
+            <p>Para adicionar utilize <code>bcadd(Base, Número para somar)</code></p>
+            <p>Para subtrair utilize <code>bcsub(Base, Número para diminuir)</code></p>
+            <p>Para dividir utilize <code>bcdiv(Dividendo, Divisor)</code></p>
+            <p>Para multiplicar utilize <code>bcmul(Base , Multiplicador)</code></p>
+            <p>Para elevar utilize <code>bcpow(Base, Expoente)</code></p>
+            <p>Para obter raiz quadrada utilize <code>bcsqrt(Número)</code></p>
+            <p>Para utilizar o número de Euler (e), use <code>exp(expoente)</code></p>
+            <p>Para utilizar o logaritmo use <code>log(argumento, base - opcional)</code>. Caso não seja informado base, será calculado o logaritmo niperiano do argumento.</p>
         </div>
     </form>
 
