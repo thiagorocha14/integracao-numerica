@@ -8,8 +8,80 @@ $intervalo = $_POST["intervalo"];
 
 if (isset($_POST['btnCalcular'])) {
     bcscale($_POST["precisao"]);
-    //$string = bc($funcao, "0.3", "0.2");
-    $string = eval('return ' . $funcao . ';');
+    if ($metodo == "1S") {
+        $alturaFinal = (double) ($limiteDireito - $limiteEsquerdo) / $intervalo;
+        $matrizFinal = tabelaY($limiteEsquerdo, $limiteDireito, $alturaFinal, $intervalo, $funcao);
+        $y = valorY($matrizFinal);
+        $string = tercoDeSimpson($y, $alturaFinal);
+    }
+}
+
+function quadraturaGaussiana($limEsquerdo, $limDireito, $numero, $integral)
+{
+    $retorno = "";
+    if ($limEsquerdo == "-1" && $limDireito == "1") {
+        $integral = str_replace("dx", "", $integral);
+
+    }
+}
+
+function tabelaY($limEsquerdo, $limDireito, $altura, $repeticoes, $integral)
+{
+    $x = 0;
+    $matriz = [];
+    $string = "";
+    for ($i = 0; $i < ($repeticoes + 1); $i++) {
+        for ($j = 0; $j < 3; $j++) {
+            if ($j == 0) {
+                $matriz[$i][$j] = $i;
+            } else {
+                if ($j == 1) {
+                    if ($i == 0) {
+                        $matriz[$i][$j] = $limEsquerdo;
+                        $x = $matriz[$i][$j];
+                    } else {
+                        $matriz[$i][$j] = $matriz[$i - 1][$j] + $altura;
+                        $x = $matriz[$i][$j];
+                    }
+                } else {
+                    $string = str_replace("x", $x, $integral);
+                    $matriz[$i][$j] = eval('return ' . $string . ';');
+                }
+            }
+        }
+    }
+    return $matriz;
+}
+
+function valorY($matriz)
+{
+    $y = [];
+    for ($i = 0; $i < count($matriz); $i++) {
+        for ($j = 0; $j < count($matriz[$i]); $j++) {
+            if ($j == 2) {
+                array_push($y, $matriz[$i][$j]);
+            }
+        }
+    }
+    return $y;
+}
+
+function tercoDeSimpson($y, $altura)
+{
+    $resultado = (double) 0;
+    for ($i = 0; $i < count($y); $i++) {
+        if ($i == 0 || $i == (count($y) - 1)) {
+            $resultado += $y[$i];
+        } else {
+            if (($i % 2) == 0) {
+                $resultado += (2 * $y[$i]);
+            } else {
+                $resultado += (4 * $y[$i]);
+            }
+        }
+    }
+    $resultado = ($altura / 3) * $resultado;
+    return $resultado;
 }
 
 //Função para "traduzir" para bc, mas não está funcionando
@@ -104,6 +176,19 @@ function bc()
             <br>
             <button class="btn btn-success float-right" name="btnCalcular">Calcular</button>
             <h1><?php echo "Resultado: " . $string ?></h1>
+            <? if(isset($matrizFinal)) { ?>
+            <h6>Tabela de Y:</h6>
+            <? $counttoken = count($token);
+                $k=0;
+                foreach($token as $key=>$value)
+                    {
+                        echo "<tr><td>$value</td>";
+                        for($i=0; $i<$counttoken;$i++)
+                        {
+                            echo "<td>" .$num[$k++]. "</td>";
+                        }
+                }   ?>
+            <? } ?>
             <br>
             <br>
             <br>
