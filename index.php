@@ -99,7 +99,6 @@ function tercoDeSimpson($y, $altura)
     return $resultado;
 }
 
-// Ainda não funcionando corretamente
 function trapezio(Array $y, float $h) {
     $result = (double) 0;
 
@@ -115,7 +114,6 @@ function trapezio(Array $y, float $h) {
     return $result;
 }
 
-// Ainda não funcionando corretamente
 function erroTrapezio(float $h, float $limSup, float $limInf, string $derivada) {
     $result = (double) 0;
     $retFinal = (string) $derivada.str_replace("x", "3");
