@@ -4,7 +4,7 @@ require_once 'funcoes.php';
 $string = (float) null;
 $funcao = $_POST["funcao"];
 $metodo = $_POST["metodo"];
-
+//echo($teste);
 //Limite esquerdo -> inferior
 $limiteEsquerdo = $_POST["limiteEsquerdo"];
 
@@ -23,18 +23,18 @@ if (isset($_POST['btnCalcular'])) {
         $alturaFinal = bcdiv(($limiteDireito - $limiteEsquerdo), $intervalo);
         $matrizFinal = tabelaY($limiteEsquerdo, $limiteDireito, $alturaFinal, $intervalo, $funcao);
         $y = valorY($matrizFinal);
-        $string = tercoDeSimpson($y, $alturaFinal);
+        $string = round(tercoDeSimpson($y, $alturaFinal),$_POST["precisao"]);
 
     } else if ($metodo == "QG") {
 
-        $string = quadraturaGaussiana($limiteEsquerdo, $limiteDireito, $intervalo, $funcao);
+        $string = round(quadraturaGaussiana($limiteEsquerdo, $limiteDireito, $intervalo, $funcao),$_POST["precisao"]);
 
     } else if ($metodo == "RT") {
 
         $h = calculaH($limiteDireito, $limiteEsquerdo, $intervalo);
         $matrizFinal = tabelaY($limiteEsquerdo, $limiteDireito, $h, $intervalo, $funcao);
         $y = valorY($matrizFinal);
-        $string = trapezio($y, $h);
+        $string = round(trapezio($y, $h),$_POST["precisao"]);
         $erro = erroTrapezio($h, $limiteDireito, $limiteEsquerdo, $funcao);
 
     } else if ($metodo == "3S") {
@@ -42,7 +42,7 @@ if (isset($_POST['btnCalcular'])) {
         $h = calculaH($limiteDireito, $limiteEsquerdo, $intervalo);
         $matrizFinal = tabelaY($limiteEsquerdo, $limiteDireito, $h, $intervalo, $funcao);
         $y = valorY($matrizFinal);
-        $string = tresOitavosSimpson($y, $h);
+        $string = round(tresOitavosSimpson($y, $h),$_POST["precisao"]);
         //$erro = erroTresOitavosSimpson($funcao, $h);
 
     } else if ($metodo == "ER") {
@@ -60,14 +60,14 @@ if (isset($_POST['btnCalcular'])) {
             $resultado1 = trapezio($y1, $h1);
             $resultado2 = trapezio($y2, $h2);
 
-            $string = extrapolacaoRicharlison($metodoRicharlisson, $intervalo, $resultado1, $intervalo2, $resultado2);
+            $string = round(extrapolacaoRicharlison($metodoRicharlisson, $intervalo, $resultado1, $intervalo2, $resultado2),$_POST["precisao"]);
         } else {
             if ($metodoRicharlisson = 2) {
 
                 $resultado1 = tercoDeSimpson($y1, $h1);
                 $resultado2 = tercoDeSimpson($y2, $h2);
 
-                $string = extrapolacaoRicharlison(2, $intervalo, $resultado1, $intervalo2, $resultado2);
+                $string = round(extrapolacaoRicharlison(2, $intervalo, $resultado1, $intervalo2, $resultado2),$_POST["precisao"]);
             } else {
 
                 $resultado1 = tresOitavosSimpson($y1, $h1);
@@ -76,7 +76,7 @@ if (isset($_POST['btnCalcular'])) {
 
                 $resultado2 = tresOitavosSimpson($y2, $h2);
 
-                $string = extrapolacaoRicharlison(2, $intervalo, $resultado1, $intervalo2, $resultado2);
+                $string = round(extrapolacaoRicharlison(2, $intervalo, $resultado1, $intervalo2, $resultado2),$_POST["precisao"]);
             }
         }
     }
@@ -150,7 +150,7 @@ if (isset($_POST['btnCalcular'])) {
                 <div class="col">
                     <label>Nº de Intervalos:&nbsp;</label><input type="number" name="intervalo" value="1" min="1">
                     <div id="intervaloRicharlison" style="display: none;">
-                        <label>Nº de Intervalos segunda função:&nbsp;</label><input type="number" name="intervalo2"
+                        <label>Nº de Intervalos 2ª:&nbsp;</label><input type="number" name="intervalo2"
                             value="1" min="1">
                     </div>
                 </div>

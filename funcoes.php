@@ -77,10 +77,10 @@ function valorY($matriz)
     }
     return $y;
 }
-
+//TODO trocar altura por passo  
 function tercoDeSimpson($y, $altura)
 {
-    $resultado = (double) 0;
+    $resultado = 0;
     for ($i = 0; $i < count($y); $i++) {
         if ($i == 0 || $i == (count($y) - 1)) {
             $resultado += $y[$i];
@@ -92,7 +92,7 @@ function tercoDeSimpson($y, $altura)
             }
         }
     }
-    $resultado = ($altura / 3) * $resultado;
+    $resultado = bcmul((bcdiv($altura,3)), $resultado);
     return $resultado;
 }
 
@@ -130,7 +130,8 @@ function extrapolacaoRicharlison($identificador, $n1, $i1, $n2, $i2)
     } else {
         $expoente = 4;
     }
-    $p1 = bcdiv(bcpow($n1, $expoente), (bcsub(bcpow($n2, $expoente), bcpow($n1, $expoente))));
+    //$p1 = bcdiv(bcpow($n1, $expoente), (bcsub(bcpow($n2, $expoente), bcpow($n1, $expoente))));
+    $p1 = (bcpow($n1, $expoente)) / (bcsub(bcpow($n2, $expoente), bcpow($n1, $expoente)));
     $p2 = bcsub($i2, $i1);
     $resultado = bcadd($i2, (bcmul($p1, $p2)));
     return $resultado;
@@ -158,19 +159,22 @@ function quadraturaGaussiana($limEsquerdo, $limDireito, $numero, $integral)
         $X = tabelaX($numero);
 
         $dt = "(((" . $limDireito . ") - (" . $limEsquerdo . ")) / 2) * ";
-        $t = "(((" . $limDireito . " - " . $limEsquerdo . ") / 2 ) * l + ((" . $limDireito . " + " . $limEsquerdo . ") / 2 ))";
+        $t = "(((" . $limDireito . " - " . $limEsquerdo . ") / 2 ) * > + ((" . $limDireito . " + " . $limEsquerdo . ") / 2 ))";
 
         $integral = str_replace("x", $t, $integral);
         $integral = $dt . $integral;
         for ($i = 0; $i < $numero; $i++) {
             if ($i == ($numero - 1)) {
-                $retorno .= $A[$i] . " * " . str_replace("l", "(" . $X[$i] . ")", $integral);
+                $retorno .= $A[$i] . " * " . str_replace(">", "(" . $X[$i] . ")", $integral);
             } else {
-                $retorno .= $A[$i] . " * " . str_replace("l", "(" . $X[$i] . ")", $integral) . "+";
+                $retorno .= $A[$i] . " * " . str_replace(">", "(" . $X[$i] . ")", $integral) . "+";
             }
         }
     }
-
+    
+    // bcdiv(1,(bcpow(bcpow((7-5x),2),1/3)))
+    // bcdiv(1,(pow(bcpow((7-5x),2),1/3)))
+    // bcdiv(1,(pow((bcpow((7-5x),2)),(1/3))))
     return eval('return ' . $retorno . ';');
 }
 
