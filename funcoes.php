@@ -1,5 +1,5 @@
 <?php
-function tresOitavosSimpson($fx, $altura)
+function tresOitavosSimpson($fx, $passo)
 {
     $resultado = 0;
     $tamanho = count($fx);
@@ -15,18 +15,18 @@ function tresOitavosSimpson($fx, $altura)
         }
 
     }
-    $resultado = ($altura / 3) * $resultado;
+    $resultado = ($passo / 3) * $resultado;
 
     return $resultado;
 }
 
-function erroTresOitavosSimpson($derivada, $altura)
+function erroTresOitavosSimpson($derivada, $passo)
 {
     $resultado = 0;
     $final = str_replace("x", "1", $derivada);
     $ExpDerivada = eval('return' . $final . ';');
 
-    $resultado = (-((3 / 8) * pow($altura, 5)) * ($ExpDerivada));
+    $resultado = (-((3 / 8) * pow($passo, 5)) * ($ExpDerivada));
 
     return $resultado;
 }
@@ -37,7 +37,7 @@ function calculaH($limSuperior, $limInferior, $nIntervalos)
     return $h;
 }
 
-function tabelaY($limEsquerdo, $limDireito, $altura, $repeticoes, $integral)
+function tabelaY($limEsquerdo, $limDireito, $passo, $repeticoes, $integral)
 {
     $x = 0;
     $matriz = [];
@@ -52,7 +52,7 @@ function tabelaY($limEsquerdo, $limDireito, $altura, $repeticoes, $integral)
                         $matriz[$i][$j] = $limEsquerdo;
                         $x = $matriz[$i][$j];
                     } else {
-                        $matriz[$i][$j] = $matriz[$i - 1][$j] + $altura;
+                        $matriz[$i][$j] = $matriz[$i - 1][$j] + $passo;
                         $x = $matriz[$i][$j];
                     }
                 } else {
@@ -77,8 +77,8 @@ function valorY($matriz)
     }
     return $y;
 }
-//TODO trocar altura por passo  
-function tercoDeSimpson($y, $altura)
+
+function tercoDeSimpson($y, $passo)
 {
     $resultado = 0;
     for ($i = 0; $i < count($y); $i++) {
@@ -92,7 +92,7 @@ function tercoDeSimpson($y, $altura)
             }
         }
     }
-    $resultado = bcmul((bcdiv($altura,3)), $resultado);
+    $resultado = bcmul((bcdiv($passo, 3)), $resultado);
     return $resultado;
 }
 
@@ -171,7 +171,7 @@ function quadraturaGaussiana($limEsquerdo, $limDireito, $numero, $integral)
             }
         }
     }
-    
+
     // bcdiv(1,(bcpow(bcpow((7-5x),2),1/3)))
     // bcdiv(1,(pow(bcpow((7-5x),2),1/3)))
     // bcdiv(1,(pow((bcpow((7-5x),2)),(1/3))))

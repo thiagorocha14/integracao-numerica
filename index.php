@@ -14,27 +14,32 @@ $intervalo = $_POST["intervalo"];
 
 //variaveis para extrapolação de richarlison
 $metodoRicharlisson = $_POST["metodoRicharlisson"];
+$yInformado = (isset($_POST["valorY"])) ? $_POST["valorY"] : null;
 $intervalo2 = $_POST["intervalo2"];
 
 if (isset($_POST['btnCalcular'])) {
     bcscale($_POST["precisao"]);
     if ($metodo == "1S") {
+        $passoFinal = bcdiv(($limiteDireito - $limiteEsquerdo), $intervalo);
+        if (isset($yInformado)) {
+            $y = $yInformado;
+        } else {
+            $matrizFinal = tabelaY($limiteEsquerdo, $limiteDireito, $passoFinal, $intervalo, $funcao);
+            $y = valorY($matrizFinal);
+        }
 
-        $alturaFinal = bcdiv(($limiteDireito - $limiteEsquerdo), $intervalo);
-        $matrizFinal = tabelaY($limiteEsquerdo, $limiteDireito, $alturaFinal, $intervalo, $funcao);
-        $y = valorY($matrizFinal);
-        $string = round(tercoDeSimpson($y, $alturaFinal),$_POST["precisao"]);
+        $string = round(tercoDeSimpson($y, $passoFinal), $_POST["precisao"]);
 
     } else if ($metodo == "QG") {
 
-        $string = round(quadraturaGaussiana($limiteEsquerdo, $limiteDireito, $intervalo, $funcao),$_POST["precisao"]);
+        $string = round(quadraturaGaussiana($limiteEsquerdo, $limiteDireito, $intervalo, $funcao), $_POST["precisao"]);
 
     } else if ($metodo == "RT") {
 
         $h = calculaH($limiteDireito, $limiteEsquerdo, $intervalo);
         $matrizFinal = tabelaY($limiteEsquerdo, $limiteDireito, $h, $intervalo, $funcao);
         $y = valorY($matrizFinal);
-        $string = round(trapezio($y, $h),$_POST["precisao"]);
+        $string = round(trapezio($y, $h), $_POST["precisao"]);
         $erro = erroTrapezio($h, $limiteDireito, $limiteEsquerdo, $funcao);
 
     } else if ($metodo == "3S") {
@@ -42,7 +47,7 @@ if (isset($_POST['btnCalcular'])) {
         $h = calculaH($limiteDireito, $limiteEsquerdo, $intervalo);
         $matrizFinal = tabelaY($limiteEsquerdo, $limiteDireito, $h, $intervalo, $funcao);
         $y = valorY($matrizFinal);
-        $string = round(tresOitavosSimpson($y, $h),$_POST["precisao"]);
+        $string = round(tresOitavosSimpson($y, $h), $_POST["precisao"]);
         //$erro = erroTresOitavosSimpson($funcao, $h);
 
     } else if ($metodo == "ER") {
@@ -55,19 +60,19 @@ if (isset($_POST['btnCalcular'])) {
         $matriz2 = tabelaY($limiteEsquerdo, $limiteDireito, $h2, $intervalo2, $funcao);
         $y2 = valorY($matriz2);
 
-        if ($metodoRicharlisson = 1) {
+        if ($metodoRicharlisson == 1) {
 
             $resultado1 = trapezio($y1, $h1);
             $resultado2 = trapezio($y2, $h2);
 
-            $string = round(extrapolacaoRicharlison($metodoRicharlisson, $intervalo, $resultado1, $intervalo2, $resultado2),$_POST["precisao"]);
+            $string = round(extrapolacaoRicharlison($metodoRicharlisson, $intervalo, $resultado1, $intervalo2, $resultado2), $_POST["precisao"]);
         } else {
-            if ($metodoRicharlisson = 2) {
+            if ($metodoRicharlisson == 2) {
 
                 $resultado1 = tercoDeSimpson($y1, $h1);
                 $resultado2 = tercoDeSimpson($y2, $h2);
 
-                $string = round(extrapolacaoRicharlison(2, $intervalo, $resultado1, $intervalo2, $resultado2),$_POST["precisao"]);
+                $string = round(extrapolacaoRicharlison(2, $intervalo, $resultado1, $intervalo2, $resultado2), $_POST["precisao"]);
             } else {
 
                 $resultado1 = tresOitavosSimpson($y1, $h1);
@@ -76,7 +81,7 @@ if (isset($_POST['btnCalcular'])) {
 
                 $resultado2 = tresOitavosSimpson($y2, $h2);
 
-                $string = round(extrapolacaoRicharlison(2, $intervalo, $resultado1, $intervalo2, $resultado2),$_POST["precisao"]);
+                $string = round(extrapolacaoRicharlison(2, $intervalo, $resultado1, $intervalo2, $resultado2), $_POST["precisao"]);
             }
         }
     }
@@ -110,6 +115,31 @@ if (isset($_POST['btnCalcular'])) {
         }
     }
     </script>
+    <script>
+    function criarTabelaValorY(checked) {
+
+        if (checked) {
+            var numero = document.getElementById("intervalo").value;
+            for (let i = 0; i <= numero; i = i + 1 ) {
+                var container = document.getElementById("divTabelaY");
+                var input = document.createElement("input");
+                input.type = "number";
+                input.name = "valorY[]"
+                input.className= "form-control";
+                input.step = "any"
+                container.appendChild(input);
+            }
+        } else {
+            var ele = document.getElementsByName("valorY[]");
+            len = ele.length;
+            parentNode = ele[0].parentNode;
+            for (var i=0; i<len; i++) {
+            parentNode.removeChild(ele[0]);
+            }
+        }
+
+    }
+    </script>
     <br>
     <br>
 
@@ -117,6 +147,7 @@ if (isset($_POST['btnCalcular'])) {
         <div class="container">
             <div class="row">
                 <div class="col">
+                    <label>Método:&nbsp;</label>
                     <select name="metodo" id="metodo" onchange="verificarRicharlison(this.value);">
                         <option value="1S">1/3 de Simpson</option>
                         <option value="3S">3/8 de Simpson</option>
@@ -142,13 +173,13 @@ if (isset($_POST['btnCalcular'])) {
             <br>
             <div class="row">
                 <div class="col">
-                    <label>Limite Esquerdo:&nbsp;</label><input type="number" name="limiteEsquerdo" value="0">
+                    <label>Limite Esquerdo:&nbsp;</label><input type="number" step="any" name="limiteEsquerdo" value="0">
                 </div>
                 <div class="col">
-                    <label>Limite Direito:&nbsp;</label><input type="number" name="limiteDireito" value="0">
+                    <label>Limite Direito:&nbsp;</label><input type="number" step="any" name="limiteDireito" value="0">
                 </div>
                 <div class="col">
-                    <label>Nº de Intervalos:&nbsp;</label><input type="number" name="intervalo" value="1" min="1">
+                    <label>Nº de Intervalos:&nbsp;</label><input type="number" name="intervalo" id="intervalo" value="1" min="1">
                     <div id="intervaloRicharlison" style="display: none;">
                         <label>Nº de Intervalos 2ª:&nbsp;</label><input type="number" name="intervalo2"
                             value="1" min="1">
@@ -156,7 +187,17 @@ if (isset($_POST['btnCalcular'])) {
                 </div>
             </div>
             <br>
-            <button class="btn btn-success float-right" name="btnCalcular">Calcular</button>
+            <div class="row">
+                <div class="col">
+                    <input type="checkbox" id="definirValorY" onclick="criarTabelaValorY(this.checked);"><label>&nbsp;Inserir valor de Y</label>
+                </div>
+                <div class="col">
+                <button class="btn btn-success float-right" name="btnCalcular">Calcular</button>
+                </div>
+            </div>
+            <div id="divTabelaY" class="form-group col-md-2">
+
+            </div>
             <h1><?php echo "Resultado: " . $string ?></h1>
             <?php if (isset($matriz1)): ?>
             <br>
