@@ -23,10 +23,21 @@ function tresOitavosSimpson($fx, $passo)
 function erroTresOitavosSimpson($derivada, $passo)
 {
     $resultado = 0;
-    $final = str_replace("x", "1", $derivada);
-    $ExpDerivada = eval('return' . $final . ';');
+    $final = str_replace("X", "1", $derivada);
+    $ExpDerivada = eval('return ' . $final . ';');
 
-    $resultado = (-((3 / 8) * pow($passo, 5)) * ($ExpDerivada));
+    $resultado = (-((3 / 80) * pow($passo, 5)) * ($ExpDerivada));
+
+    return $resultado;
+}
+
+function erroTercoSimpson($derivada, $passo)
+{
+    $resultado = 0;
+    $final = str_replace("X", "1", $derivada);
+    $ExpDerivada = eval('return ' . $final . ';');
+
+    $resultado = (-((1 / 90) * pow($passo, 5)) * ($ExpDerivada));
 
     return $resultado;
 }
@@ -56,7 +67,7 @@ function tabelaY($limEsquerdo, $limDireito, $passo, $repeticoes, $integral)
                         $x = $matriz[$i][$j];
                     }
                 } else {
-                    $string = str_replace("x", $x, $integral);
+                    $string = str_replace("X", $x, $integral);
                     $matriz[$i][$j] = eval('return ' . $string . ';');
                 }
             }
@@ -115,7 +126,7 @@ function trapezio(array $y, float $h)
 function erroTrapezio(float $h, float $limSup, float $limInf, string $derivada)
 {
     $result = (double) 0;
-    $retFinal = (string) str_replace("x", "3", $derivada);
+    $retFinal = (string) str_replace("X", "3", $derivada);
     $devF = (double) eval('return ' . $retFinal . ';');
     $result = (-((($limSup - $limInf) * bcpow($h, "2")) / 12)) * $devF;
 
@@ -130,7 +141,6 @@ function extrapolacaoRicharlison($identificador, $n1, $i1, $n2, $i2)
     } else {
         $expoente = 4;
     }
-    //$p1 = bcdiv(bcpow($n1, $expoente), (bcsub(bcpow($n2, $expoente), bcpow($n1, $expoente))));
     $p1 = (bcpow($n1, $expoente)) / (bcsub(bcpow($n2, $expoente), bcpow($n1, $expoente)));
     $p2 = bcsub($i2, $i1);
     $resultado = bcadd($i2, (bcmul($p1, $p2)));
@@ -147,9 +157,9 @@ function quadraturaGaussiana($limEsquerdo, $limDireito, $numero, $integral)
 
         for ($i = 0; $i < $numero; $i++) {
             if ($i == ($numero - 1)) {
-                $retorno .= "bcmul(" . $A[$i] . " , " . str_replace("x", $X[$i], $integral) . ")";
+                $retorno .= "bcmul(" . $A[$i] . " , " . str_replace("X", $X[$i], $integral) . ")";
             } else {
-                $retorno .= "bcmul(" . $A[$i] . " , " . str_replace("x", $X[$i], $integral) . ")" . "+";
+                $retorno .= "bcmul(" . $A[$i] . " , " . str_replace("X", $X[$i], $integral) . ")" . "+";
             }
         }
 
@@ -161,7 +171,7 @@ function quadraturaGaussiana($limEsquerdo, $limDireito, $numero, $integral)
         $dt = "(((" . $limDireito . ") - (" . $limEsquerdo . ")) / 2) * ";
         $t = "(((" . $limDireito . " - " . $limEsquerdo . ") / 2 ) * > + ((" . $limDireito . " + " . $limEsquerdo . ") / 2 ))";
 
-        $integral = str_replace("x", $t, $integral);
+        $integral = str_replace("X", $t, $integral);
         $integral = $dt . $integral;
         for ($i = 0; $i < $numero; $i++) {
             if ($i == ($numero - 1)) {
@@ -172,9 +182,6 @@ function quadraturaGaussiana($limEsquerdo, $limDireito, $numero, $integral)
         }
     }
 
-    // bcdiv(1,(bcpow(bcpow((7-5x),2),1/3)))
-    // bcdiv(1,(pow(bcpow((7-5x),2),1/3)))
-    // bcdiv(1,(pow((bcpow((7-5x),2)),(1/3))))
     return eval('return ' . $retorno . ';');
 }
 
@@ -274,41 +281,4 @@ function tabelaX($n)
         array_push($retorno, 0.9602898565);
     }
     return $retorno;
-}
-
-//Função para "traduzir" para bc, mas não está funcionando
-function bc()
-{
-    $functions = 'sqrt';
-    $argv = func_get_args();
-    $string = str_replace(' ', '', '(' . $argv[0] . ')');
-    $string = preg_replace('/\$([0-9\.]+)/', '$argv[$1]', $string);
-    while (preg_match('/((' . $functions . ')?)\(([^\)\(]*)\)/', $string, $match)) {
-        while (
-            preg_match('/([0-9\.]+)(\^)([0-9\.]+)/', $match[3], $m) ||
-            preg_match('/([0-9\.]+)([\*\/\%])([0-9\.]+)/', $match[3], $m) ||
-            preg_match('/([0-9\.]+)([\+\-])([0-9\.]+)/', $match[3], $m)
-        ) {
-            switch ($m[2]) {
-                case '+':$result = bcadd($m[1], $m[3]);
-                    break;
-                case '-':$result = bcsub($m[1], $m[3]);
-                    break;
-                case '*':$result = bcmul($m[1], $m[3]);
-                    break;
-                case '/':$result = bcdiv($m[1], $m[3]);
-                    break;
-                case '%':$result = bcmod($m[1], $m[3]);
-                    break;
-                case '^':$result = bcpow($m[1], $m[3]);
-                    break;
-            }
-            $match[3] = str_replace($m[0], $result, $match[3]);
-        }
-        if (!empty($match[1]) && function_exists($func = 'bc' . $match[1])) {
-            $match[3] = $func($match[3]);
-        }
-        $string = str_replace($match[0], $match[3], $string);
-    }
-    return $string;
 }

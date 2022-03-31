@@ -4,86 +4,105 @@ require_once 'funcoes.php';
 $string = (float) null;
 $funcao = $_POST["funcao"];
 $metodo = $_POST["metodo"];
-//echo($teste);
-//Limite esquerdo -> inferior
-$limiteEsquerdo = $_POST["limiteEsquerdo"];
+if (!(str_contains($funcao, "X"))) {
+    echo ("Você não informou X na sua função!");
+    die();
+}
+//Limite Inferior -> inferior
+$limiteInferior = $_POST["limiteInferior"];
 
-//Limite direito -> superior
-$limiteDireito = $_POST["limiteDireito"];
+//Limite Superior -> superior
+$limiteSuperior = $_POST["limiteSuperior"];
 $intervalo = $_POST["intervalo"];
 
 //variaveis para extrapolação de richarlison
-$metodoRicharlisson = $_POST["metodoRicharlisson"];
+$metodoRicharlisson1 = $_POST["metodoRicharlisson1"];
+$metodoRicharlisson2 = $_POST["metodoRicharlisson2"];
 $yInformado = (isset($_POST["valorY"])) ? $_POST["valorY"] : null;
 $intervalo2 = $_POST["intervalo2"];
 
 if (isset($_POST['btnCalcular'])) {
     bcscale($_POST["precisao"]);
     if ($metodo == "1S") {
-        $passoFinal = bcdiv(($limiteDireito - $limiteEsquerdo), $intervalo);
+        $h = calculaH($limiteSuperior, $limiteInferior, $intervalo);
         if (isset($yInformado)) {
             $y = $yInformado;
         } else {
-            $matrizFinal = tabelaY($limiteEsquerdo, $limiteDireito, $passoFinal, $intervalo, $funcao);
+            $matrizFinal = tabelaY($limiteInferior, $limiteSuperior, $h, $intervalo, $funcao);
             $y = valorY($matrizFinal);
+            $erro = erroTercoSimpson($funcao, $h);
         }
 
-        $string = round(tercoDeSimpson($y, $passoFinal), $_POST["precisao"]);
-
+        $string = round(tercoDeSimpson($y, $h, $intervalo), $_POST["precisao"]);
     } else if ($metodo == "QG") {
 
-        $string = round(quadraturaGaussiana($limiteEsquerdo, $limiteDireito, $intervalo, $funcao), $_POST["precisao"]);
+        $string = round(quadraturaGaussiana($limiteInferior, $limiteSuperior, $intervalo, $funcao), $_POST["precisao"]);
 
     } else if ($metodo == "RT") {
 
-        $h = calculaH($limiteDireito, $limiteEsquerdo, $intervalo);
-        $matrizFinal = tabelaY($limiteEsquerdo, $limiteDireito, $h, $intervalo, $funcao);
-        $y = valorY($matrizFinal);
+        $h = calculaH($limiteSuperior, $limiteInferior, $intervalo);
+        if (isset($yInformado)) {
+            $y = $yInformado;
+        } else {
+            $matrizFinal = tabelaY($limiteInferior, $limiteSuperior, $h, $intervalo, $funcao);
+            $y = valorY($matrizFinal);
+            $erro = erroTrapezio($h, $limiteSuperior, $limiteInferior, $funcao);
+        }
         $string = round(trapezio($y, $h), $_POST["precisao"]);
-        $erro = erroTrapezio($h, $limiteDireito, $limiteEsquerdo, $funcao);
 
     } else if ($metodo == "3S") {
 
-        $h = calculaH($limiteDireito, $limiteEsquerdo, $intervalo);
-        $matrizFinal = tabelaY($limiteEsquerdo, $limiteDireito, $h, $intervalo, $funcao);
-        $y = valorY($matrizFinal);
-        $string = round(tresOitavosSimpson($y, $h), $_POST["precisao"]);
-        //$erro = erroTresOitavosSimpson($funcao, $h);
+        $h = calculaH($limiteSuperior, $limiteInferior, $intervalo);
+        if (isset($yInformado)) {
+            $y = $yInformado;
+        } else {
+            $matrizFinal = tabelaY($limiteInferior, $limiteSuperior, $h, $intervalo, $funcao);
+            $y = valorY($matrizFinal);
+            $erro = erroTresOitavosSimpson($funcao, $h);
+        }
+        $string = round(tresOitavosSimpson($y, $h, $intervalo), $_POST["precisao"]);
 
     } else if ($metodo == "ER") {
 
-        $h1 = calculaH($limiteDireito, $limiteEsquerdo, $intervalo);
-        $matriz1 = tabelaY($limiteEsquerdo, $limiteDireito, $h1, $intervalo, $funcao);
-        $y1 = valorY($matriz1);
-
-        $h2 = calculaH($limiteDireito, $limiteEsquerdo, $intervalo2);
-        $matriz2 = tabelaY($limiteEsquerdo, $limiteDireito, $h2, $intervalo2, $funcao);
-        $y2 = valorY($matriz2);
-
-        if ($metodoRicharlisson == 1) {
-
-            $resultado1 = trapezio($y1, $h1);
-            $resultado2 = trapezio($y2, $h2);
-
-            $string = round(extrapolacaoRicharlison($metodoRicharlisson, $intervalo, $resultado1, $intervalo2, $resultado2), $_POST["precisao"]);
-        } else {
-            if ($metodoRicharlisson == 2) {
-
-                $resultado1 = tercoDeSimpson($y1, $h1);
-                $resultado2 = tercoDeSimpson($y2, $h2);
-
-                $string = round(extrapolacaoRicharlison(2, $intervalo, $resultado1, $intervalo2, $resultado2), $_POST["precisao"]);
-            } else {
-
-                $resultado1 = tresOitavosSimpson($y1, $h1);
-
-                //$erro = erroTresOitavosSimpson($resultado1, $h1);
-
-                $resultado2 = tresOitavosSimpson($y2, $h2);
-
-                $string = round(extrapolacaoRicharlison(2, $intervalo, $resultado1, $intervalo2, $resultado2), $_POST["precisao"]);
+        $h1 = calculaH($limiteSuperior, $limiteInferior, $intervalo);
+        $h2 = calculaH($limiteSuperior, $limiteInferior, $intervalo2);
+        $teste = $intervalo2 / $intervalo;
+        $y1 = [];
+        if (isset($yInformado)) {
+            for ($i = 0; $i < count($yInformado); $i++) {
+                if ($i % $teste == 0) {
+                    array_push($y1, $yInformado[$i]);
+                }
             }
+            $y2 = $yInformado;
+        } else {
+            $matriz1 = tabelaY($limiteInferior, $limiteSuperior, $h1, $intervalo, $funcao);
+            $y1 = valorY($matriz1);
+
+            $matriz2 = tabelaY($limiteInferior, $limiteSuperior, $h2, $intervalo2, $funcao);
+            $y2 = valorY($matriz2);
         }
+        if ($metodoRicharlisson1 == 1) {
+            $identificador = 1;
+            $resultado1 = trapezio($y1, $h1);
+        } else if ($metodoRicharlisson1 == 2) {
+            $identificador = 2;
+            $resultado1 = tercoDeSimpson($y1, $h1);
+        } else if ($metodoRicharlisson1 == 3) {
+            $identificador = 2;
+            $resultado1 = tresOitavosSimpson($y1, $h1);
+        }
+        if ($metodoRicharlisson2 == 1) {
+            $identificador = 1;
+            $resultado2 = trapezio($y2, $h2);
+        } else if ($metodoRicharlisson2 == 2) {
+            $identificador = 2;
+            $resultado2 = tercoDeSimpson($y2, $h2);
+        } else if ($metodoRicharlisson2 == 3) {
+            $identificador = 2;
+            $resultado2 = tresOitavosSimpson($y2, $h2);
+        }
+        $string = round(extrapolacaoRicharlison($identificador, $intervalo, $resultado1, $intervalo2, $resultado2), $_POST["precisao"]);
     }
 
 }
@@ -107,10 +126,16 @@ if (isset($_POST['btnCalcular'])) {
     <script>
     function verificarRicharlison(val) {
         if (val == "ER") {
-            document.getElementById('metodoRicharlisson').style.display = 'block';
+            document.getElementById('labelRicharlisson1').style.display = 'block';
+            document.getElementById('labelRicharlisson2').style.display = 'block';
+            document.getElementById('metodoRicharlisson1').style.display = 'block';
+            document.getElementById('metodoRicharlisson2').style.display = 'block';
             document.getElementById('intervaloRicharlison').style.display = 'block';
         } else {
-            document.getElementById('metodoRicharlisson').style.display = 'none';
+            document.getElementById('labelRicharlisson1').style.display = 'none';
+            document.getElementById('labelRicharlisson2').style.display = 'none';
+            document.getElementById('metodoRicharlisson1').style.display = 'none';
+            document.getElementById('metodoRicharlisson2').style.display = 'none';
             document.getElementById('intervaloRicharlison').style.display = 'none';
         }
     }
@@ -120,6 +145,10 @@ if (isset($_POST['btnCalcular'])) {
 
         if (checked) {
             var numero = document.getElementById("intervalo").value;
+            var numero2 = document.getElementById("intervalo2").value;
+            if (numero2 > numero) {
+                numero = numero2;
+            }
             for (let i = 0; i <= numero; i = i + 1 ) {
                 var container = document.getElementById("divTabelaY");
                 var input = document.createElement("input");
@@ -155,7 +184,14 @@ if (isset($_POST['btnCalcular'])) {
                         <option value="RT">Regra dos Trapézios</option>
                         <option value="QG">Quadratura Gauciana</option>
                     </select>
-                    <select style="display: none;" name="metodoRicharlisson" id="metodoRicharlisson">
+                    <label style="display: none;" id="labelRicharlisson1">Método da 1ª</label>
+                    <select style="display: none;" name="metodoRicharlisson1" id="metodoRicharlisson1">
+                        <option value="1">Regra dos Trapézios</option>
+                        <option value="2">1/3 de Simpson</option>
+                        <option value="3">3/8 de Simpson</option>
+                    </select>
+                    <label style="display: none;" id="labelRicharlisson2">Método da 2ª</label>
+                    <select style="display: none;" name="metodoRicharlisson2" id="metodoRicharlisson2">
                         <option value="1">Regra dos Trapézios</option>
                         <option value="2">1/3 de Simpson</option>
                         <option value="3">3/8 de Simpson</option>
@@ -173,16 +209,15 @@ if (isset($_POST['btnCalcular'])) {
             <br>
             <div class="row">
                 <div class="col">
-                    <label>Limite Esquerdo:&nbsp;</label><input type="number" step="any" name="limiteEsquerdo" value="0">
+                    <label>Limite Inferior:&nbsp;</label><input type="number" step="any" name="limiteInferior" value="0">
                 </div>
                 <div class="col">
-                    <label>Limite Direito:&nbsp;</label><input type="number" step="any" name="limiteDireito" value="0">
+                    <label>Limite Superior:&nbsp;</label><input type="number" step="any" name="limiteSuperior" value="0">
                 </div>
                 <div class="col">
                     <label>Nº de Intervalos:&nbsp;</label><input type="number" name="intervalo" id="intervalo" value="1" min="1">
                     <div id="intervaloRicharlison" style="display: none;">
-                        <label>Nº de Intervalos 2ª:&nbsp;</label><input type="number" name="intervalo2"
-                            value="1" min="1">
+                    <label>Nº de Intervalos 2ª:&nbsp;</label><input type="number" name="intervalo2" id="intervalo2" value="1" min="1">
                     </div>
                 </div>
             </div>
@@ -199,9 +234,10 @@ if (isset($_POST['btnCalcular'])) {
 
             </div>
             <h1><?php echo "Resultado: " . $string ?></h1>
-            <?php if (isset($matriz1)): ?>
+            <?php if (isset($resultado1)): ?>
             <br>
             <h3><?php echo ("Resultado primeira: " . $resultado1); ?></h3>
+            <?php if (isset($matriz1)): ?>
             <h6>Tabela de Y primeira:</h6>
             <table class="table">
                 <tr>
@@ -216,11 +252,13 @@ if (isset($_POST['btnCalcular'])) {
                     <?php endforeach;?>
                     <?php echo ('</tr>'); ?>
                 <?php endforeach;?>
+                <?php endif;?>
             <?php endif;?>
             </table>
-            <?php if (isset($matriz2)): ?>
+            <?php if (isset($resultado2)): ?>
                 <br>
                 <?php echo ("<h3>Resultado segunda: " . $resultado2 . "</h3>"); ?>
+                <?php if (isset($matriz2)): ?>
                 <h6>Tabela de Y segunda:</h6>
                 <table class="table">
                     <tr>
@@ -235,6 +273,7 @@ if (isset($_POST['btnCalcular'])) {
                     <?php endforeach;?>
                     <?php echo ('</tr>'); ?>
                 <?php endforeach;?>
+                <?php endif;?>
             <?php endif;?>
             </table>
                     <h3><?php if (isset($erro)) {echo ("Erro: " . $erro);}?></h3>
@@ -261,6 +300,7 @@ if (isset($_POST['btnCalcular'])) {
                     <br>
                     <br>
                     <h6>Dicas:</h6>
+                    <p><b>Sempre utilizar o X em maiúsculo, pois pode ocorrer conflitos com outras funções</b></p>
                     <p>Para adicionar utilize <code>bcadd(Base, Número para somar)</code></p>
                     <p>Para subtrair utilize <code>bcsub(Base, Número para diminuir)</code></p>
                     <p>Para dividir utilize <code>bcdiv(Dividendo, Divisor)</code></p>
