@@ -4,10 +4,10 @@ require_once 'funcoes.php';
 $string = (float) null;
 $funcao = $_POST["funcao"];
 $metodo = $_POST["metodo"];
-// if (!(str_contains($funcao, "X"))) {
-//     echo ("Você não informou X na sua função!");
-//     die();
-// }
+if (!(str_contains($funcao, "X"))) {
+    echo ("Você não informou X na sua função!");
+    die();
+}
 //Limite Inferior -> inferior
 $limiteInferior = $_POST["limiteInferior"];
 
