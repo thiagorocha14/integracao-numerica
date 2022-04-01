@@ -31,10 +31,11 @@ function erroTresOitavosSimpson($derivada, $passo)
     return $resultado;
 }
 
-function erroTercoSimpson($derivada, $passo)
+function erroTercoSimpson($derivada, $passo, $valorX)
 {
+    // Assim melhorou o resultado, mas ainda ta bem longe. Provavelmente tem que derivar 4 vezes essa variavel final, mas nao procurei muito bem como.
     $resultado = 0;
-    $final = str_replace("X", "1", $derivada);
+    $final = str_replace("X", $valorX, $derivada);
     $ExpDerivada = eval('return ' . $final . ';');
 
     $resultado = (-((1 / 90) * pow($passo, 5)) * ($ExpDerivada));
@@ -125,10 +126,11 @@ function trapezio(array $y, float $h)
 
 function erroTrapezio(float $h, float $limSup, float $limInf, string $derivada)
 {
+    //TODO passar o resultado de x pra dar o replace no valor correto
     $result = (double) 0;
     $retFinal = (string) str_replace("X", "3", $derivada);
     $devF = (double) eval('return ' . $retFinal . ';');
-    $result = (-((($limSup - $limInf) * bcpow($h, "2")) / 12)) * $devF;
+    $result = (-((($limSup - $limInf) * bcpow($h, "3")) / 12)) * $devF;
 
     return $result;
 }

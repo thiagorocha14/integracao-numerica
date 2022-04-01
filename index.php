@@ -2,24 +2,24 @@
 
 require_once 'funcoes.php';
 $string = (float) null;
-$funcao = $_POST["funcao"];
-$metodo = $_POST["metodo"];
-if (!(str_contains($funcao, "X"))) {
+$funcao = isset($_POST["funcao"]) ? $_POST["funcao"] : null;
+$metodo = isset($_POST["metodo"]) ? $_POST["metodo"] : null;
+if ($funcao && !(str_contains($funcao, "X"))) {
     echo ("Você não informou X na sua função!");
     die();
 }
 //Limite Inferior -> inferior
-$limiteInferior = $_POST["limiteInferior"];
+$limiteInferior = isset($_POST["limiteInferior"]) ? $_POST["limiteInferior"] : null;
 
 //Limite Superior -> superior
-$limiteSuperior = $_POST["limiteSuperior"];
-$intervalo = $_POST["intervalo"];
+$limiteSuperior = isset($_POST["limiteSuperior"]) ? $_POST["limiteSuperior"] : null;
+$intervalo = isset($_POST["intervalo"]) ? $_POST["intervalo"] : null;
 
 //variaveis para extrapolação de richarlison
-$metodoRicharlisson1 = $_POST["metodoRicharlisson1"];
-$metodoRicharlisson2 = $_POST["metodoRicharlisson2"];
+$metodoRicharlisson1 = isset($_POST["metodoRicharlisson1"]) ? $_POST["metodoRicharlisson1"] : null;
+$metodoRicharlisson2 = isset($_POST["metodoRicharlisson2"]) ? $_POST["metodoRicharlisson2"] : null;
 $yInformado = (isset($_POST["valorY"])) ? $_POST["valorY"] : null;
-$intervalo2 = $_POST["intervalo2"];
+$intervalo2 = isset($_POST["intervalo2"]) ? $_POST["intervalo2"] : null;
 
 if (isset($_POST['btnCalcular'])) {
     bcscale($_POST["precisao"]);
@@ -27,13 +27,13 @@ if (isset($_POST['btnCalcular'])) {
         $h = calculaH($limiteSuperior, $limiteInferior, $intervalo);
         if (isset($yInformado)) {
             $y = $yInformado;
+            $string = round(tercoDeSimpson($y, $h, $intervalo), $_POST["precisao"]);
         } else {
             $matrizFinal = tabelaY($limiteInferior, $limiteSuperior, $h, $intervalo, $funcao);
             $y = valorY($matrizFinal);
-            $erro = erroTercoSimpson($funcao, $h);
+            $string = round(tercoDeSimpson($y, $h, $intervalo), $_POST["precisao"]);
+            // $erro = erroTercoSimpson($funcao, $h, $string);
         }
-
-        $string = round(tercoDeSimpson($y, $h, $intervalo), $_POST["precisao"]);
     } else if ($metodo == "QG") {
 
         $string = round(quadraturaGaussiana($limiteInferior, $limiteSuperior, $intervalo, $funcao), $_POST["precisao"]);
