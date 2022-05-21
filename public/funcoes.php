@@ -33,7 +33,9 @@ function erroTresOitavosSimpson($derivada, $passo)
 
 function erroTercoSimpson($derivada, $passo, $valorX)
 {
-    // Assim melhorou o resultado, mas ainda ta bem longe. Provavelmente tem que derivar 4 vezes essa variavel final, mas nao procurei muito bem como.
+    // TODO Corrigir o resultado.
+    // Assim melhorou o resultado, mas ainda ta bem longe.
+    // Provavelmente tem que derivar 4 vezes essa variavel final, mas nao procurei muito bem como.
     $resultado = 0;
     $final = str_replace("X", $valorX, $derivada);
     $ExpDerivada = eval('return ' . $final . ';');

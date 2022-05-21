@@ -8,10 +8,8 @@ if ($funcao && !(str_contains($funcao, "X"))) {
     echo ("Você não informou X na sua função!");
     die();
 }
-//Limite Inferior -> inferior
-$limiteInferior = isset($_POST["limiteInferior"]) ? $_POST["limiteInferior"] : null;
 
-//Limite Superior -> superior
+$limiteInferior = isset($_POST["limiteInferior"]) ? $_POST["limiteInferior"] : null;
 $limiteSuperior = isset($_POST["limiteSuperior"]) ? $_POST["limiteSuperior"] : null;
 $intervalo = isset($_POST["intervalo"]) ? $_POST["intervalo"] : null;
 
@@ -20,9 +18,10 @@ $metodoRicharlisson1 = isset($_POST["metodoRicharlisson1"]) ? $_POST["metodoRich
 $metodoRicharlisson2 = isset($_POST["metodoRicharlisson2"]) ? $_POST["metodoRicharlisson2"] : null;
 $yInformado = (isset($_POST["valorY"])) ? $_POST["valorY"] : null;
 $intervalo2 = isset($_POST["intervalo2"]) ? $_POST["intervalo2"] : null;
+$escala = isset($_POST["precisao"]) ? $_POST["precisao"] : 2;
 
 if (isset($_POST['btnCalcular'])) {
-    bcscale($_POST["precisao"]);
+    bcscale($escala);
     if ($metodo == "1S") {
         $h = calculaH($limiteSuperior, $limiteInferior, $intervalo);
         if (isset($yInformado)) {
@@ -149,12 +148,12 @@ if (isset($_POST['btnCalcular'])) {
             if (numero2 > numero) {
                 numero = numero2;
             }
-            for (let i = 0; i <= numero; i = i + 1 ) {
+            for (let i = 0; i <= numero; i = i + 1) {
                 var container = document.getElementById("divTabelaY");
                 var input = document.createElement("input");
                 input.type = "number";
                 input.name = "valorY[]"
-                input.className= "form-control";
+                input.className = "form-control";
                 input.step = "any"
                 container.appendChild(input);
             }
@@ -162,8 +161,8 @@ if (isset($_POST['btnCalcular'])) {
             var ele = document.getElementsByName("valorY[]");
             len = ele.length;
             parentNode = ele[0].parentNode;
-            for (var i=0; i<len; i++) {
-            parentNode.removeChild(ele[0]);
+            for (var i = 0; i < len; i++) {
+                parentNode.removeChild(ele[0]);
             }
         }
 
@@ -209,25 +208,30 @@ if (isset($_POST['btnCalcular'])) {
             <br>
             <div class="row">
                 <div class="col">
-                    <label>Limite Inferior:&nbsp;</label><input type="number" step="any" name="limiteInferior" value="0">
+                    <label>Limite Inferior:&nbsp;</label><input type="number" step="any" name="limiteInferior"
+                        value="0">
                 </div>
                 <div class="col">
-                    <label>Limite Superior:&nbsp;</label><input type="number" step="any" name="limiteSuperior" value="0">
+                    <label>Limite Superior:&nbsp;</label><input type="number" step="any" name="limiteSuperior"
+                        value="0">
                 </div>
                 <div class="col">
-                    <label>Nº de Intervalos:&nbsp;</label><input type="number" name="intervalo" id="intervalo" value="1" min="1">
+                    <label>Nº de Intervalos:&nbsp;</label><input type="number" name="intervalo" id="intervalo" value="1"
+                        min="1">
                     <div id="intervaloRicharlison" style="display: none;">
-                    <label>Nº de Intervalos 2ª:&nbsp;</label><input type="number" name="intervalo2" id="intervalo2" value="1" min="1">
+                        <label>Nº de Intervalos 2ª:&nbsp;</label><input type="number" name="intervalo2" id="intervalo2"
+                            value="1" min="1">
                     </div>
                 </div>
             </div>
             <br>
             <div class="row">
                 <div class="col">
-                    <input type="checkbox" id="definirValorY" onclick="criarTabelaValorY(this.checked);"><label>&nbsp;Inserir valor de Y</label>
+                    <input type="checkbox" id="definirValorY"
+                        onclick="criarTabelaValorY(this.checked);"><label>&nbsp;Inserir valor de Y</label>
                 </div>
                 <div class="col">
-                <button class="btn btn-success float-right" name="btnCalcular">Calcular</button>
+                    <button class="btn btn-success float-right" name="btnCalcular">Calcular</button>
                 </div>
             </div>
             <div id="divTabelaY" class="form-group col-md-2">
@@ -246,71 +250,71 @@ if (isset($_POST['btnCalcular'])) {
                     <th>Y</th>
                 </tr>
                 <?php foreach ($matriz1 as $matriz): ?>
-                    <?php echo ('<tr>'); ?>
-                    <?php foreach ($matriz as $array): ?>
-                    <?php echo ('<td>' . $array . '</td>'); ?>
-                    <?php endforeach;?>
-                    <?php echo ('</tr>'); ?>
+                <?php echo ('<tr>'); ?>
+                <?php foreach ($matriz as $array): ?>
+                <?php echo ('<td>' . $array . '</td>'); ?>
+                <?php endforeach;?>
+                <?php echo ('</tr>'); ?>
                 <?php endforeach;?>
                 <?php endif;?>
-            <?php endif;?>
+                <?php endif;?>
             </table>
             <?php if (isset($resultado2)): ?>
-                <br>
-                <?php echo ("<h3>Resultado segunda: " . $resultado2 . "</h3>"); ?>
-                <?php if (isset($matriz2)): ?>
-                <h6>Tabela de Y segunda:</h6>
-                <table class="table">
-                    <tr>
-                        <th>i</th>
-                        <th>X</th>
-                        <th>Y</th>
-                    </tr>
-                    <?php foreach ($matriz2 as $matriz): ?>
-                    <?php echo ('<tr>'); ?>
-                    <?php foreach ($matriz as $array): ?>
-                    <?php echo ('<td>' . $array . '</td>'); ?>
-                    <?php endforeach;?>
-                    <?php echo ('</tr>'); ?>
+            <br>
+            <?php echo ("<h3>Resultado segunda: " . $resultado2 . "</h3>"); ?>
+            <?php if (isset($matriz2)): ?>
+            <h6>Tabela de Y segunda:</h6>
+            <table class="table">
+                <tr>
+                    <th>i</th>
+                    <th>X</th>
+                    <th>Y</th>
+                </tr>
+                <?php foreach ($matriz2 as $matriz): ?>
+                <?php echo ('<tr>'); ?>
+                <?php foreach ($matriz as $array): ?>
+                <?php echo ('<td>' . $array . '</td>'); ?>
+                <?php endforeach;?>
+                <?php echo ('</tr>'); ?>
                 <?php endforeach;?>
                 <?php endif;?>
-            <?php endif;?>
+                <?php endif;?>
             </table>
-                    <h3><?php if (isset($erro)) {echo ("Erro: " . $erro);}?></h3>
+            <h3><?php if (isset($erro)) {echo ("Erro: " . $erro);}?></h3>
 
-                    <?php if (isset($matrizFinal)): ?>
-                    <br>
-                    <h6>Tabela de Y:</h6>
-                    <table class="table">
-                        <tr>
-                            <th>i</th>
-                            <th>X</th>
-                            <th>Y</th>
-                        </tr>
-                        <?php foreach ($matrizFinal as $matriz): ?>
-                        <?php echo ('<tr>'); ?>
-                        <?php foreach ($matriz as $array): ?>
-                        <?php echo ('<td>' . $array . '</td>'); ?>
-                        <?php endforeach;?>
-                        <?php echo ('</tr>'); ?>
-                        <?php endforeach;?>
-                        <?php endif;?>
-                    </table>
-                    <br>
-                    <br>
-                    <br>
-                    <h6>Dicas:</h6>
-                    <p><b>Sempre utilizar o X em maiúsculo, pois pode ocorrer conflitos com outras funções</b></p>
-                    <p>Para adicionar utilize <code>bcadd(Base, Número para somar)</code></p>
-                    <p>Para subtrair utilize <code>bcsub(Base, Número para diminuir)</code></p>
-                    <p>Para dividir utilize <code>bcdiv(Dividendo, Divisor)</code></p>
-                    <p>Para multiplicar utilize <code>bcmul(Base , Multiplicador)</code></p>
-                    <p>Para elevar utilize <code>bcpow(Base, Expoente)</code></p>
-                    <p>Para obter raiz quadrada utilize <code>bcsqrt(Número)</code></p>
-                    <p>Para utilizar o número de Euler (e), use <code>exp(expoente)</code></p>
-                    <p>Para utilizar o logaritmo use <code>log(argumento, base - opcional)</code>. Caso não seja
-                        informado base,
-                        será calculado o logaritmo niperiano do argumento.</p>
+            <?php if (isset($matrizFinal)): ?>
+            <br>
+            <h6>Tabela de Y:</h6>
+            <table class="table">
+                <tr>
+                    <th>i</th>
+                    <th>X</th>
+                    <th>Y</th>
+                </tr>
+                <?php foreach ($matrizFinal as $matriz): ?>
+                <?php echo ('<tr>'); ?>
+                <?php foreach ($matriz as $array): ?>
+                <?php echo ('<td>' . $array . '</td>'); ?>
+                <?php endforeach;?>
+                <?php echo ('</tr>'); ?>
+                <?php endforeach;?>
+                <?php endif;?>
+            </table>
+            <br>
+            <br>
+            <br>
+            <h6>Dicas:</h6>
+            <p><b>Sempre utilizar o X em maiúsculo, pois pode ocorrer conflitos com outras funções</b></p>
+            <p>Para adicionar utilize <code>bcadd(Base, Número para somar)</code></p>
+            <p>Para subtrair utilize <code>bcsub(Base, Número para diminuir)</code></p>
+            <p>Para dividir utilize <code>bcdiv(Dividendo, Divisor)</code></p>
+            <p>Para multiplicar utilize <code>bcmul(Base , Multiplicador)</code></p>
+            <p>Para elevar utilize <code>bcpow(Base, Expoente)</code></p>
+            <p>Para obter raiz quadrada utilize <code>bcsqrt(Número)</code></p>
+            <p>Para utilizar o número de Euler (e), use <code>exp(expoente)</code></p>
+            <p>Para utilizar o logaritmo use <code>log(argumento, base - opcional)</code>. Caso não seja
+                informado base,
+                será calculado o logaritmo niperiano do argumento.</p>
         </div>
     </form>
 
